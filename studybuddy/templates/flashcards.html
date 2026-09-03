@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Flashcards{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>🗂️ Flashcards</h1>
+  <p class="subtitle">Tap a card to flip it. Use Next/Prev to move through the deck.</p>
+
+  {% if data.flashcards|length == 0 %}
+    <p>No flashcards could be generated for this content.</p>
+  {% else %}
+    <div class="flashcard-wrap" id="flashcard-wrap">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-face flashcard-front" id="card-front"></div>
+        <div class="flashcard-face flashcard-back" id="card-back"></div>
+      </div>
+    </div>
+
+    <div class="flashcard-nav">
+      <button class="btn secondary" id="prev-btn">← Prev</button>
+      <span class="flashcard-counter" id="counter"></span>
+      <button class="btn secondary" id="next-btn">Next →</button>
+    </div>
+  {% endif %}
+
+  <div class="btn-row" style="margin-top:20px;">
+    <a href="{{ url_for('quiz_view', result_id=result_id) }}" class="btn secondary">← Take Quiz</a>
+    <a href="{{ url_for('result', result_id=result_id) }}" class="btn secondary">← Back</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const cards = {{ data.flashcards | tojson }};
+  let index = 0;
+
+  const frontEl = document.getElementById("card-front");
+  const backEl = document.getElementById("card-back");
+  const flashcardEl = document.getElementById("flashcard");
+  const counterEl = document.getElementById("counter");
+
+  function render() {
+    if (!cards.length) return;
+    flashcardEl.classList.remove("flipped");
+    frontEl.textContent = cards[index].front;
+    backEl.textContent = cards[index].back;
+    counterEl.textContent = `${index + 1} / ${cards.length}`;
+  }
+
+  document.getElementById("flashcard-wrap")?.addEventListener("click", () => {
+    flashcardEl.classList.toggle("flipped");
+  });
+
+  document.getElementById("next-btn")?.addEventListener("click", () => {
+    index = (index + 1) % cards.length;
+    render();
+  });
+
+  document.getElementById("prev-btn")?.addEventListener("click", () => {
+    index = (index - 1 + cards.length) % cards.length;
+    render();
+  });
+
+  render();
+</script>
+{% endblock %}

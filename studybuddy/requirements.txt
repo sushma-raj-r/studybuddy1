@@ -1,0 +1,29 @@
+# Core web framework
+Flask==3.0.3
+
+# NLP / text processing
+nltk==3.9.1
+sumy==0.11.0
+
+# Translation (used for the Hindi/Kannada pivot + easy future language support)
+deep-translator==1.11.4
+
+# PDF text extraction
+PyPDF2==3.0.1
+
+# Speech-to-text (prebuilt wheels — no compiler needed on Windows/Mac/Linux)
+faster-whisper==1.0.3
+
+# URL/video downloading (YouTube, Drive links, etc.)
+# Keep this updated frequently — YouTube changes its bot-check logic often,
+# and an outdated yt-dlp is the #1 cause of "Please sign in" errors.
+# If you still hit that error after installing, run: pip install -U yt-dlp
+yt-dlp>=2024.11.4
+
+# Google Drive video downloads (more reliable than YouTube — no bot-check)
+gdown==5.2.0
+
+# Note: you must also install ffmpeg separately (not a pip package):
+#   Windows : choco install ffmpeg   (or download from ffmpeg.org and add to PATH)
+#   macOS   : brew install ffmpeg
+#   Linux   : sudo apt install ffmpeg

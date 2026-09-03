@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}StudyBuddy — Upload{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>Missed a class?</h1>
+  <p class="subtitle">Upload the lecture video, a link, or the slides/PDF — get a clean summary, a quiz, and flashcards in seconds.</p>
+
+  <div class="tabs">
+    <button type="button" class="tab-btn active" data-target="tab-video">🎥 Video</button>
+    <button type="button" class="tab-btn" data-target="tab-url">🔗 URL</button>
+    <button type="button" class="tab-btn" data-target="tab-pdf">📄 PDF</button>
+  </div>
+
+  <form action="{{ url_for('process') }}" method="POST" enctype="multipart/form-data" id="upload-form">
+
+    <div class="form-group tab-panel" id="tab-video">
+      <label>Upload lecture video</label>
+      <input type="file" name="file" id="file-input-video" accept=".mp4,.mov,.mkv,.avi,.webm">
+    </div>
+
+    <div class="form-group tab-panel" id="tab-url" style="display:none;">
+      <label>Lecture URL (Google Drive link recommended, YouTube also supported)</label>
+      <input type="url" name="url" placeholder="https://drive.google.com/file/d/...">
+      <small style="color: var(--text-muted); display:block; margin-top:6px;">
+        Tip: Google Drive links are more reliable than YouTube — make sure the file's
+        sharing setting is "Anyone with the link".
+      </small>
+    </div>
+
+    <div class="form-group tab-panel" id="tab-pdf" style="display:none;">
+      <label>Upload PDF (slides / notes)</label>
+      <input type="file" name="file" id="file-input-pdf" accept=".pdf">
+    </div>
+
+    <input type="hidden" name="source_type" id="source_type" value="video">
+
+    <div class="form-group">
+      <label>Output language</label>
+      <select name="language">
+        {% for code, name in languages %}
+          <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="submit" class="btn" id="submit-btn">Generate Summary, Quiz & Flashcards →</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>How it works</h2>
+  <p class="subtitle" style="margin-bottom:0;">
+    We transcribe the audio (Whisper), strip filler words like "umm" / "uhh" (NLTK),
+    extract the key points (TextRank summarization), then auto-generate a quiz and
+    flashcards from that summary — all translatable into English, Hindi, or Kannada.
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const tabs = document.querySelectorAll(".tab-btn");
+  const panels = { "tab-video": "video", "tab-url": "url", "tab-pdf": "pdf" };
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      Object.keys(panels).forEach(id => {
+        document.getElementById(id).style.display = (id === tab.dataset.target) ? "block" : "none";
+      });
+
+      document.getElementById("source_type").value = panels[tab.dataset.target];
+    });
+  });
+
+  document.getElementById("upload-form").addEventListener("submit", (e) => {
+    // Only the file input belonging to the CURRENTLY VISIBLE tab should be
+    // submitted. Both the video and PDF inputs share name="file", so if we
+    // don't clear the hidden one's `name`, the browser submits both and
+    // Flask may pick up the empty one instead of the one you actually chose.
+    const sourceType = document.getElementById("source_type").value;
+
+    const videoInput = document.getElementById("file-input-video");
+    const pdfInput = document.getElementById("file-input-pdf");
+
+    videoInput.name = (sourceType === "video") ? "file" : "";
+    pdfInput.name = (sourceType === "pdf") ? "file" : "";
+
+    const btn = document.getElementById("submit-btn");
+    btn.textContent = "Processing... this can take a minute ⏳";
+    btn.disabled = true;
+  });
+</script>
+{% endblock %}

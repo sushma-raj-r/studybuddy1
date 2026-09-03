@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Quiz{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>🧠 Quiz</h1>
+  <p class="subtitle">Answer each question, then submit — wrong answers will show the correct one.</p>
+
+  <form id="quiz-form">
+    {% for q in data.quiz %}
+      <div class="quiz-question" data-qid="{{ q.id }}">
+        <p class="q-text">{{ loop.index }}. {{ q.question }}</p>
+        <div class="option-list">
+          {% for opt in q.options %}
+            <label class="option-label" data-option="{{ opt }}">
+              <input type="radio" name="q{{ q.id }}" value="{{ opt }}">
+              {{ opt }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn" id="submit-quiz-btn">Submit Quiz</button>
+  </form>
+
+  <div id="quiz-score"></div>
+
+  <div class="btn-row" style="margin-top:20px;">
+    <a href="{{ url_for('flashcards_view', result_id=result_id) }}" class="btn secondary">View Flashcards →</a>
+    <a href="{{ url_for('result', result_id=result_id) }}" class="btn secondary">← Back</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const RESULT_ID = "{{ result_id }}";
+
+  document.getElementById("quiz-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const answers = {};
+    document.querySelectorAll(".quiz-question").forEach(qDiv => {
+      const qid = qDiv.dataset.qid;
+      const selected = qDiv.querySelector("input[type=radio]:checked");
+      answers[qid] = selected ? selected.value : null;
+    });
+
+    const res = await fetch("/api/grade_quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ result_id: RESULT_ID, answers }),
+    });
+    const data = await res.json();
+
+    // Highlight each question: green on correct answer, red on wrong selection
+    data.results.forEach(r => {
+      const qDiv = document.querySelector(`.quiz-question[data-qid="${r.id}"]`);
+      qDiv.querySelectorAll(".option-label").forEach(label => {
+        const opt = label.dataset.option;
+        label.querySelector("input").disabled = true;
+
+        if (opt === r.correct_answer) {
+          label.classList.add("correct");
+        } else if (opt === r.selected && !r.is_correct) {
+          label.classList.add("incorrect");
+        }
+      });
+    });
+
+    const scoreBox = document.getElementById("quiz-score");
+    scoreBox.style.display = "block";
+    scoreBox.textContent = `You scored ${data.score} / ${data.total}`;
+
+    document.getElementById("submit-quiz-btn").disabled = true;
+    document.getElementById("submit-quiz-btn").textContent = "Submitted";
+  });
+</script>
+{% endblock %}

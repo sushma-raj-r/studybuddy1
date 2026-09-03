@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Summary{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>📝 Summary</h1>
+  <p class="subtitle">Only the important points — filler words and sounds already removed.</p>
+
+  {% for sentence in data.summary %}
+    <div class="summary-sentence">{{ sentence }}</div>
+  {% endfor %}
+
+  <div class="btn-row" style="margin-top:20px;">
+    <a href="{{ url_for('quiz_view', result_id=result_id) }}" class="btn">Take Quiz →</a>
+    <a href="{{ url_for('flashcards_view', result_id=result_id) }}" class="btn secondary">View Flashcards</a>
+    <a href="{{ url_for('result', result_id=result_id) }}" class="btn secondary">← Back</a>
+  </div>
+</div>
+{% endblock %}

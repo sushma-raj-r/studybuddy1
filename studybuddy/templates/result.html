@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}StudyBuddy — Result{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>Your study material is ready ✅</h1>
+  <p class="subtitle">
+    Language: {{ lang_name }}
+    <span class="badge">{{ data.summary|length }} key points</span>
+    <span class="badge">{{ data.quiz|length }} quiz questions</span>
+    <span class="badge">{{ data.flashcards|length }} flashcards</span>
+  </p>
+
+  <div class="mode-grid">
+    <a class="mode-card" href="{{ url_for('summary_view', result_id=result_id) }}">
+      <span class="icon">📝</span>
+      <span class="label">Summary</span>
+    </a>
+    <a class="mode-card" href="{{ url_for('quiz_view', result_id=result_id) }}">
+      <span class="icon">🧠</span>
+      <span class="label">Quiz</span>
+    </a>
+    <a class="mode-card" href="{{ url_for('flashcards_view', result_id=result_id) }}">
+      <span class="icon">🗂️</span>
+      <span class="label">Flashcards</span>
+    </a>
+  </div>
+
+  <div class="btn-row" style="margin-top:24px;">
+    <a href="{{ url_for('index') }}" class="btn secondary">← Upload another</a>
+  </div>
+</div>
+{% endblock %}
